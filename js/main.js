@@ -27,8 +27,8 @@ $(document).ready(function () {
                 processor.loadImg('p4', imgs[3]);
                 processor.video.play();
 
-                const v = [img1, img2, img3].map(e => encodeURIComponent(e)).join(',')
-                setQueryStringParameter('imgs', v)
+                const v = [img1, img2, img3].join(',')
+                setQueryStringParameter('imgs', encodeURIComponent(v))
             });
     });
 
