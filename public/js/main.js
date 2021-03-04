@@ -123,18 +123,22 @@ let processor = {
         if (this.video.currentTime < 1.3 && !this.done1) {
             this.p1.draw(this.screenPositions);
             this.done1 = true
+            this.printUrl();
         }
         else if (this.video.currentTime >= 1.3 && this.video.currentTime < 3.2 && !this.done2) {
             this.p2.draw(this.screenPositions);
             this.done2 = true
+            this.printUrl();
         }
         else if (this.video.currentTime >= 3.2 && this.video.currentTime < 4.7 && !this.done3) {
             this.p3.draw(this.screenPositions);
             this.done3 = true
+            this.printUrl();
         }
         else if (this.video.currentTime >= 4.7 && !this.done4) {
             this.p4.draw(this.screenPositions);
             this.done4 = true
+            this.printUrl();
         }
         this.ctx1.drawImage(this.c2, 0, 0, this.width, this.height);
 
@@ -143,6 +147,12 @@ let processor = {
         updateProgress((this.video.currentTime / this.video.duration * 100), '播放預覽')
 
         return;
+    },
+
+    printUrl: function () {
+        this.ctx2.font = "28px Arial";
+        this.ctx2.fillStyle = "white";
+        this.ctx2.fillText("https://lab.howgerwatch.aotter.net", 200, 340);
     }
 
 }
