@@ -66,7 +66,7 @@ let processor = {
         let self = this;
         setTimeout(function () {
             self.timerCallback();
-        }, 0);
+        }, 100);
     },
 
     doLoad: function () {
@@ -81,6 +81,20 @@ let processor = {
             self.height = self.video.videoHeight;
             self.timerCallback();
         }, false);
+        this.gif = new GIF({
+            width: 640,
+            height: 360,
+            workerScript: 'js/gif/gif.worker.js'
+        });
+        this.video.addEventListener("ended", function () {
+            self.gif.render();
+        }, false);
+        this.gif.on('progress', function (p) {
+            console.log(p)
+        });
+        this.gif.on('finished', function (blob) {
+            window.open(URL.createObjectURL(blob));
+        });
     },
 
     loadImg: function (name, img) {
@@ -103,23 +117,26 @@ let processor = {
 
     computeFrame: function () {
         this.ctx1.drawImage(this.video, 0, 0, this.width, this.height);
+        //this.gif.addFrame(this.ctx2, { copy: true })
+        //console.log(this.video)
 
-        if (this.video.currentTime < 3.3 && !this.done1) {
+        if (this.video.currentTime < 1.3 && !this.done1) {
             this.p1.draw(this.screenPositions);
             this.done1 = true
         }
-        else if (this.video.currentTime >= 3.3 && this.video.currentTime < 5 && !this.done2) {
+        else if (this.video.currentTime >= 1.3 && this.video.currentTime < 3 && !this.done2) {
             this.p2.draw(this.screenPositions);
             this.done2 = true
         }
-        else if (this.video.currentTime >= 5 && this.video.currentTime < 6.6 && !this.done3) {
+        else if (this.video.currentTime >= 3 && this.video.currentTime < 4.6 && !this.done3) {
             this.p3.draw(this.screenPositions);
             this.done3 = true
         }
-        else if (this.video.currentTime >= 6.6 && !this.done4) {
+        else if (this.video.currentTime >= 4.6 && !this.done4) {
             this.p4.draw(this.screenPositions);
             this.done4 = true
         }
+        this.gif.addFrame(this.ctx2, { copy: true, delay: 100 })
         return;
     }
 
@@ -131,16 +148,13 @@ async function loadImages(imageUrlArray) {
     const imageArray = []; // array for the images
 
     for (let imageUrl of imageUrlArray) {
-
         promiseArray.push(new Promise(resolve => {
-
             const img = new Image();
-
             img.onload = function () {
                 resolve();
             };
 
-            img.src = imageUrl;
+            img.src = '/img/' + encodeURIComponent(imageUrl);
             imageArray.push(img);
         }));
     }
