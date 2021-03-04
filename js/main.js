@@ -1,4 +1,9 @@
+const defaultImg = 'https://via.placeholder.com/150/000000/000000'
+
+
 $(document).ready(function () {
+
+    processor.doLoad();
 
     let searchParams = new URLSearchParams(window.location.search)
     if (searchParams.has('imgs')) {
@@ -6,14 +11,24 @@ $(document).ready(function () {
         $('#img1').val(urls[0] || "");
         $('#img2').val(urls[1] || "");
         $('#img3').val(urls[2] || "");
+
+        // autoplay if any not blank
+        if (urls[0] || urls[1] || urls[2]) {
+            // fixme: should wait until video loaded 
+            setTimeout(() => {
+                play();
+            }, 1000)
+
+        }
     }
 
-    processor.doLoad();
-
-    const defaultImg = 'https://via.placeholder.com/150/000000/000000'
 
     $('#form').submit((e) => {
         e.preventDefault();
+        play();
+    });
+
+    function play() {
         processor.video.currentTime = 0;
         processor.resetDoneFlags();
         const img1 = $('#img1').val();
@@ -30,7 +45,7 @@ $(document).ready(function () {
                 const v = [img1, img2, img3].join(',')
                 setQueryStringParameter('imgs', encodeURIComponent(v))
             });
-    });
+    }
 
 });
 

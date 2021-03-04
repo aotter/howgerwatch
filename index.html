@@ -97,12 +97,13 @@
                         <label for="img3">填入第三張圖網址</label>
                         <input type="url" class="form-control" id="img3">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">生成！讓How哥說你棒</button>
+                    <button id="btn-submit" type="submit" class="btn btn-primary btn-block">生成！讓How哥說你棒</button>
                 </form>
             </div>
         </div>
 
-        <video id="video" src="media/video.mp4" style="display: none;"></video>
+        <video id="video" src="media/video.mp4" style="display: none;" webkit-playsinline="true" playsinline="true"
+            muted="muted"></video>
 
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
             integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
