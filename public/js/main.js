@@ -5,22 +5,22 @@ $(document).ready(function () {
 
     processor.doLoad();
 
-    let searchParams = new URLSearchParams(window.location.search)
-    if (searchParams.has('imgs')) {
-        const urls = searchParams.get('imgs').split(',').map(u => decodeURIComponent(u))
-        $('#img1').val(urls[0] || "");
-        $('#img2').val(urls[1] || "");
-        $('#img3').val(urls[2] || "");
+    // let searchParams = new URLSearchParams(window.location.search)
+    // if (searchParams.has('imgs')) {
+    //     const urls = searchParams.get('imgs').split(',').map(u => decodeURIComponent(u))
+    //     $('#img1').val(urls[0] || "");
+    //     $('#img2').val(urls[1] || "");
+    //     $('#img3').val(urls[2] || "");
 
-        // autoplay if any not blank
-        if (urls[0] || urls[1] || urls[2]) {
-            // fixme: should wait until video loaded 
-            setTimeout(() => {
-                play();
-            }, 1000)
+    //     // autoplay if any not blank
+    //     if (urls[0] || urls[1] || urls[2]) {
+    //         // fixme: should wait until video loaded 
+    //         setTimeout(() => {
+    //             play();
+    //         }, 1000)
 
-        }
-    }
+    //     }
+    // }
 
 
     $('#form').submit((e) => {
@@ -31,6 +31,18 @@ $(document).ready(function () {
     function play() {
         processor.video.currentTime = 0;
         processor.resetDoneFlags();
+        processor.gif = new GIF({
+            width: 640,
+            height: 360,
+            workerScript: 'js/gif/gif.worker.js'
+        });
+        processor.gif.on('progress', function (p) {
+            updateProgress(p * 100, '輸出 GIF')
+        });
+        processor.gif.on('finished', function (blob) {
+            download(URL.createObjectURL(blob), 'How哥你都看了些啥.gif');
+        });
+
         const img1 = $('#img1').val();
         const img2 = $('#img2').val();
         const img3 = $('#img3').val();
@@ -42,8 +54,8 @@ $(document).ready(function () {
                 processor.loadImg('p4', imgs[3]);
                 processor.video.play();
 
-                const v = [img1, img2, img3].join(',')
-                setQueryStringParameter('imgs', encodeURIComponent(v))
+                //const v = [img1, img2, img3].join(',')
+                //setQueryStringParameter('imgs', encodeURIComponent(v))
             });
     }
 
@@ -81,20 +93,10 @@ let processor = {
             self.height = self.video.videoHeight;
             self.timerCallback();
         }, false);
-        this.gif = new GIF({
-            width: 640,
-            height: 360,
-            workerScript: 'js/gif/gif.worker.js'
-        });
         this.video.addEventListener("ended", function () {
             self.gif.render();
         }, false);
-        this.gif.on('progress', function (p) {
-            console.log(p)
-        });
-        this.gif.on('finished', function (blob) {
-            window.open(URL.createObjectURL(blob));
-        });
+
     },
 
     loadImg: function (name, img) {
@@ -117,26 +119,29 @@ let processor = {
 
     computeFrame: function () {
         this.ctx1.drawImage(this.video, 0, 0, this.width, this.height);
-        //this.gif.addFrame(this.ctx2, { copy: true })
-        //console.log(this.video)
 
         if (this.video.currentTime < 1.3 && !this.done1) {
             this.p1.draw(this.screenPositions);
             this.done1 = true
         }
-        else if (this.video.currentTime >= 1.3 && this.video.currentTime < 3 && !this.done2) {
+        else if (this.video.currentTime >= 1.3 && this.video.currentTime < 3.2 && !this.done2) {
             this.p2.draw(this.screenPositions);
             this.done2 = true
         }
-        else if (this.video.currentTime >= 3 && this.video.currentTime < 4.6 && !this.done3) {
+        else if (this.video.currentTime >= 3.2 && this.video.currentTime < 4.7 && !this.done3) {
             this.p3.draw(this.screenPositions);
             this.done3 = true
         }
-        else if (this.video.currentTime >= 4.6 && !this.done4) {
+        else if (this.video.currentTime >= 4.7 && !this.done4) {
             this.p4.draw(this.screenPositions);
             this.done4 = true
         }
-        this.gif.addFrame(this.ctx2, { copy: true, delay: 100 })
+        this.ctx1.drawImage(this.c2, 0, 0, this.width, this.height);
+
+        this.gif.addFrame(this.ctx1, { copy: true, delay: 100 })
+
+        updateProgress((this.video.currentTime / this.video.duration * 100), '播放預覽')
+
         return;
     }
 
@@ -161,4 +166,17 @@ async function loadImages(imageUrlArray) {
 
     await Promise.all(promiseArray);
     return imageArray;
+}
+
+function download(dataurl, filename) {
+    var a = document.createElement("a");
+    a.href = dataurl;
+    a.setAttribute("download", filename);
+    a.click();
+}
+
+const progress = $('#progress');
+function updateProgress(value, text) {
+    progress.html(text + ' ' + value.toFixed(0) + '%');
+    //$('.progress-bar').css('width', value + '%').attr('aria-valuenow', value).html(text + ' ' + value.toFixed(0) + '%');
 }
